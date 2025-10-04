@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, Image, Dimensions } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { Card, Button } from 'react-native-paper';
 import { useAppContext } from '@/context/AppContext';
-import { mealsData } from '@/data/mealsData';
+import { allRecipes } from '@/data/loadAllRecipes';
 
 const { width, height } = Dimensions.get('window');
 
@@ -12,13 +12,13 @@ export default function MealSwipeScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleSwipeRight = (cardIndex) => {
-    const meal = mealsData[cardIndex];
+    const meal = allRecipes[cardIndex];
     addLikedMeal(meal);
     console.log('Liked:', meal.name);
   };
 
   const handleSwipeLeft = (cardIndex) => {
-    const meal = mealsData[cardIndex];
+    const meal = allRecipes[cardIndex];
     console.log('Disliked:', meal.name);
   };
 
@@ -51,8 +51,11 @@ export default function MealSwipeScreen() {
             </View>
           </View>
 
-          <Text style={styles.ingredientsTitle}>Ingredients:</Text>
-          <Text style={styles.ingredients}>{meal.ingredients.join(', ')}</Text>
+          <Text style={styles.ingredientsTitle}>Key Ingredients:</Text>
+          <Text style={styles.ingredients}>{meal.ingredients.slice(0, 4).join(', ')}</Text>
+          {meal.ingredients.length > 4 && (
+            <Text style={styles.moreIngredients}>+{meal.ingredients.length - 4} more</Text>
+          )}
         </Card.Content>
       </Card>
     );
@@ -65,11 +68,11 @@ export default function MealSwipeScreen() {
       
       <View style={styles.swiperContainer}>
         <Swiper
-          cards={mealsData}
+          cards={allRecipes}
           renderCard={renderCard}
           onSwipedRight={handleSwipeRight}
           onSwipedLeft={handleSwipeLeft}
-          onSwipedAll={() => console.log('All cards swiped')}
+          onSwipedAll={() => console.log('All 500 cards swiped!')}
           cardIndex={currentIndex}
           backgroundColor="transparent"
           stackSize={3}
@@ -124,23 +127,24 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   swiperContainer: {
-    flex: 1,
+    height: height * 0.5,
     marginHorizontal: 20,
+    marginBottom: 20,
   },
   card: {
-    height: height * 0.6,
+    height: height * 0.5,
     borderRadius: 20,
     elevation: 5,
     backgroundColor: 'white',
   },
   mealImage: {
     width: '100%',
-    height: 200,
+    height: 150,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
   cardContent: {
-    padding: 20,
+    padding: 15,
     flex: 1,
   },
   mealName: {
@@ -157,10 +161,10 @@ const styles = StyleSheet.create({
   nutritionContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 15,
+    marginBottom: 10,
     paddingVertical: 10,
     backgroundColor: '#f8f8f8',
-    borderRadius: 10,
+    borderRadius: 8,
   },
   nutritionItem: {
     alignItems: 'center',
@@ -185,6 +189,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     lineHeight: 20,
+  },
+  moreIngredients: {
+    fontSize: 12,
+    color: '#999',
+    fontStyle: 'italic',
+    marginTop: 5,
   },
   actionButtons: {
     flexDirection: 'row',
