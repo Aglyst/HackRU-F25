@@ -172,8 +172,9 @@ const styles = StyleSheet.create({
   swiperContainer: {
     width: '100%',
     height: '100%',
-    padding: 16,
-    paddingTop: 0,
+    paddingHorizontal: 16,
+    paddingTop: -40, // Move cards up by 40 units
+    marginTop: -40,  // Compensate for the negative padding
   },
   card: {
     width: '100%',
