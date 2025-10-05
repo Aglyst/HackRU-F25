@@ -1,6 +1,5 @@
-import * as FileSystem from 'expo-file-system';
-import { Asset } from 'expo-asset';
 import { Meal } from './mealsData';
+import { newRecipes } from './newRecipes';
 
 interface RecipeData {
   id: number;
@@ -77,21 +76,21 @@ const convertRecipeToMeal = (recipe: RecipeData): Meal => {
   };
 };
 
-// Load and convert all recipes from the JSONL file
+// Load all recipes from newRecipes.ts
 export const loadAllRecipes = async (): Promise<Meal[]> => {
   try {
-    // Load the JSONL file
-    const fileUri = Asset.fromModule(require('./recipes_top500_with_macros.jsonl')).uri;
-    const fileContent = await FileSystem.readAsStringAsync(fileUri);
-    
-    // Parse JSONL file (each line is a separate JSON object)
-    const recipes = fileContent
-      .split('\n')
-      .filter(line => line.trim() !== '')
-      .map(line => JSON.parse(line) as RecipeData);
-    
-    // Convert to Meal format
-    return recipes.map(recipe => convertRecipeToMeal(recipe));
+    // Convert newRecipes to Meal format
+    return newRecipes.map(recipe => ({
+      id: recipe.id,
+      name: recipe.name,
+      image: recipe.imageUrl || getFoodImage(getMealType(recipe)),
+      type: getMealType(recipe),
+      calories: Math.round(recipe.macros?.calories || 0),
+      protein: Math.round(recipe.macros?.protein_g || 0),
+      carbs: Math.round(recipe.macros?.carbs_g || 0),
+      fat: Math.round(recipe.macros?.fat_g || 0),
+      ingredients: recipe.ingredients || []
+    }));
   } catch (error) {
     console.error('Error loading recipes:', error);
     return [];

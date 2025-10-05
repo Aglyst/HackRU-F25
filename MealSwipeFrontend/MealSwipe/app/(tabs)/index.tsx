@@ -23,46 +23,87 @@ export default function MealSwipeScreen() {
   };
 
   const renderCard = (meal) => {
-    if (!meal) return null;
+    if (!meal) {
+      console.log('No meal data received');
+      return (
+        <View style={[styles.card, { backgroundColor: '#ffebee', justifyContent: 'center', alignItems: 'center' }]}>
+          <Text>No meal data available</Text>
+        </View>
+      );
+    }
+    
+    console.log('Rendering meal:', {
+      name: meal.name,
+      image: meal.image,
+      type: meal.type,
+      calories: meal.calories,
+      hasImage: !!meal.image
+    });
     
     return (
-      <Card style={styles.card}>
+      <View style={styles.card}>
         <View style={styles.cardInner}>
-          <Image source={{ uri: meal.image }} style={styles.mealImage} />
-          <Card.Content style={styles.cardContent}>
-          <Text style={styles.mealName}>{meal.name}</Text>
-          <Text style={styles.mealType}>{meal.type.toUpperCase()}</Text>
-          
-          <View style={styles.nutritionContainer}>
-            <View style={styles.nutritionItem}>
-              <Text style={styles.nutritionLabel}>Calories</Text>
-              <Text style={styles.nutritionValue}>{meal.calories}</Text>
+          <View style={styles.imageContainer}>
+            {meal.image ? (
+              <Image 
+                source={{ uri: meal.image }} 
+                style={styles.mealImage} 
+                resizeMode="cover"
+                onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
+              />
+            ) : (
+              <View style={styles.placeholderImage}>
+                <Text>No Image Available</Text>
+              </View>
+            )}
+          </View>
+          <View style={styles.contentContainer}>
+            <View>
+              <Text style={styles.mealName} numberOfLines={2}>{meal.name || 'No Name'}</Text>
+              {meal.type && (
+                <Text style={styles.mealType}>{meal.type.toUpperCase()}</Text>
+              )}
             </View>
-            <View style={styles.nutritionItem}>
-              <Text style={styles.nutritionLabel}>Protein</Text>
-              <Text style={styles.nutritionValue}>{meal.protein}g</Text>
+            
+            <View style={styles.nutritionContainer}>
+              <View style={styles.nutritionItem}>
+                <Text style={styles.nutritionLabel}>Calories</Text>
+                <Text style={styles.nutritionValue}>{meal.calories}</Text>
+              </View>
+              <View style={styles.nutritionItem}>
+                <Text style={styles.nutritionLabel}>Protein</Text>
+                <Text style={styles.nutritionValue}>{meal.protein}g</Text>
+              </View>
+              <View style={styles.nutritionItem}>
+                <Text style={styles.nutritionLabel}>Carbs</Text>
+                <Text style={styles.nutritionValue}>{meal.carbs}g</Text>
+              </View>
+              <View style={styles.nutritionItem}>
+                <Text style={styles.nutritionLabel}>Fat</Text>
+                <Text style={styles.nutritionValue}>{meal.fat}g</Text>
+              </View>
             </View>
-            <View style={styles.nutritionItem}>
-              <Text style={styles.nutritionLabel}>Carbs</Text>
-              <Text style={styles.nutritionValue}>{meal.carbs}g</Text>
-            </View>
-            <View style={styles.nutritionItem}>
-              <Text style={styles.nutritionLabel}>Fat</Text>
-              <Text style={styles.nutritionValue}>{meal.fat}g</Text>
+
+            <View>
+              <Text style={styles.ingredientsTitle}>Key Ingredients:</Text>
+              <Text style={styles.ingredients} numberOfLines={2}>
+                {meal.ingredients.slice(0, 4).join(', ')}
+                {meal.ingredients.length > 4 && (
+                  <Text style={styles.moreIngredients}>
+                    {' '}+{meal.ingredients.length - 4} more
+                  </Text>
+                )}
+              </Text>
             </View>
           </View>
-
-          <Text style={styles.ingredientsTitle}>Key Ingredients:</Text>
-          <Text style={styles.ingredients}>{meal.ingredients.slice(0, 4).join(', ')}</Text>
-          {meal.ingredients.length > 4 && (
-            <Text style={styles.moreIngredients}>+{meal.ingredients.length - 4} more</Text>
-          )}
-          </Card.Content>
         </View>
-      </Card>
+      </View>
     );
   };
 
+  console.log('All recipes count:', allRecipes.length);
+  console.log('First recipe:', allRecipes[0]);
+  
   return (
     <View style={styles.container}>
       <View style={{ width: '100%', alignItems: 'center', marginBottom: 20 }}>
@@ -73,7 +114,17 @@ export default function MealSwipeScreen() {
       <View style={{ flex: 1, width: '100%' }}>
         <View style={styles.swiperContainer}>
           <Swiper
-            cards={allRecipes}
+            cards={allRecipes.length > 0 ? allRecipes : [{
+              id: -1,
+              name: 'No recipes found',
+              image: 'https://via.placeholder.com/300x200?text=No+Recipes',
+              type: 'error',
+              calories: 0,
+              protein: 0,
+              carbs: 0,
+              fat: 0,
+              ingredients: []
+            }]}
             renderCard={renderCard}
             onSwipedRight={handleSwipeRight}
             onSwipedLeft={handleSwipeLeft}
@@ -101,8 +152,9 @@ export default function MealSwipeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-    padding: 20,
+    backgroundColor: '#f8f9fa',
+    padding: 0,
+    paddingTop: 20,
   },
   title: {
     fontSize: 28,
@@ -118,37 +170,60 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   swiperContainer: {
-    height: height * 0.5,
     width: '100%',
-    marginTop: 20,
-    marginBottom: 20,
+    height: '100%',
+    padding: 16,
+    paddingTop: 0,
   },
   card: {
-    height: '100%',
     width: '100%',
-    borderRadius: 20,
+    aspectRatio: 0.75, // Better for swiping
     backgroundColor: 'white',
+    borderRadius: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    overflow: 'hidden',
   },
   cardInner: {
     flex: 1,
-    overflow: 'hidden',
-    borderRadius: 20,
+    width: '100%',
+    height: '100%',
+  },
+  imageContainer: {
+    width: '100%',
+    height: '60%',
   },
   mealImage: {
     width: '100%',
-    height: 50, // Further reduced height
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    height: '100%',
   },
-  cardContent: {
-    padding: 10, // Reduced from 15 to make the card more compact
+  placeholderImage: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  contentContainer: {
+    padding: 16,
     flex: 1,
+    justifyContent: 'space-between',
   },
   mealName: {
-    fontSize: 16, // Reduced from 20
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 1, // Reduced from 3
     color: '#333',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  mealDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 12,
+    lineHeight: 18,
   },
   mealType: {
     fontSize: 10, // Reduced from 12
