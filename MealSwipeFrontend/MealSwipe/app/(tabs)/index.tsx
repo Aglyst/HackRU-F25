@@ -248,6 +248,13 @@ export default function MealSwipeScreen() {
           )}
         </View>
       </View>
+      
+      {/* Liked Meals Counter */}
+      <View style={styles.likedCounterContainer}>
+        <Text style={styles.likedCounterText}>
+          {likedMeals.length} {likedMeals.length === 1 ? 'Meal' : 'Meals'} Liked
+        </Text>
+      </View>
     </View>
   );
 };
@@ -257,6 +264,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
     padding: 16,
+    position: 'relative',
   },
   title: {
     fontSize: 28,
@@ -273,7 +281,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '100%',
-    aspectRatio: 0.75,
+    height: height * 0.6 - 50, // 60% of screen height minus 50 units
     backgroundColor: 'white',
     borderRadius: 16,
     elevation: 4,
@@ -394,6 +402,28 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+  },
+  likedCounterContainer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    padding: 10,
+  },
+  likedCounterText: {
+    backgroundColor: 'white',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   noResultsText: {
     fontSize: 18,
