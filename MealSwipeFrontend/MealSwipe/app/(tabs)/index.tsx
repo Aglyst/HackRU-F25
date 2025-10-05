@@ -1,11 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { StyleSheet, View, Text, Image, Dimensions, SafeAreaView } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { Card, Button } from 'react-native-paper';
 import { useAppContext } from '@/context/AppContext';
 import { allRecipes } from '@/data/loadAllRecipes';
+import { Meal } from '@/data/mealsData';
 
 const { width, height } = Dimensions.get('window');
+
+interface NutritionFilters {
+  highProtein: boolean;
+  lowCarb: boolean;
+  lowFat: boolean;
+  highCalories: boolean;
+}
+
+interface DietaryFilters {
+  vegetarian: boolean;
+  vegan: boolean;
+  glutenFree: boolean;
+  dairyFree: boolean;
+}
+
+interface MealTypeFilters {
+  breakfast: boolean;
+  lunch: boolean;
+  dinner: boolean;
+}
 
 export default function MealSwipeScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -16,47 +37,58 @@ export default function MealSwipeScreen() {
     mealTypeFilters,
     nutritionFilters,
     dietaryFilters,
-    setMealTypeFilters,
-    setNutritionFilters,
-    setDietaryFilters
   } = useAppContext();
 
-  // useEffect(() => {
-  //   console.log('Meal Type Filters Set:', mealTypeFilters);
-  //   console.log('Nutrition Filters Set:', nutritionFilters);
-  //   console.log('Dietary Filters Set:', dietaryFilters);
-  
-  // }, [mealTypeFilters, nutritionFilters, dietaryFilters]);
-  
+  // Filter recipes based on selected filters
+  const filteredRecipes = useMemo(() => {
+    return allRecipes.filter((meal: Meal) => {
+      // Filter by meal type
+      const mealTypeKey = meal.type as keyof MealTypeFilters;
+      if (Object.values(mealTypeFilters).some(Boolean) && !mealTypeFilters[mealTypeKey]) {
+        return false;
+      }
 
-  const handleSwipeRight = (cardIndex) => {
-    const meal = allRecipes[cardIndex];
+      // Filter by nutrition
+      if (nutritionFilters.highProtein && meal.protein < 25) return false;
+      if (nutritionFilters.lowCarb && meal.carbs > 50) return false;
+      if (nutritionFilters.lowFat && meal.fat > 15) return false;
+      if (nutritionFilters.highCalories && meal.calories < 500) return false;
+
+      // Filter by dietary restrictions
+      const restrictions = meal.dietaryRestrictions || [];
+      if (dietaryFilters.vegetarian && !restrictions.includes('vegetarian')) return false;
+      if (dietaryFilters.vegan && !restrictions.includes('vegan')) return false;
+      if (dietaryFilters.glutenFree && !restrictions.includes('gluten-free')) return false;
+      if (dietaryFilters.dairyFree && !restrictions.includes('dairy-free')) return false;
+
+      return true;
+    });
+  }, [allRecipes, mealTypeFilters, nutritionFilters, dietaryFilters]);
+
+  // Reset swiper index when filters change
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [filteredRecipes]);
+
+  const handleSwipeRight = (cardIndex: number) => {
+    const meal = filteredRecipes[cardIndex];
     addLikedMeal(meal);
     console.log('Liked:', meal.name);
   };
 
-  const handleSwipeLeft = (cardIndex) => {
-    const meal = allRecipes[cardIndex];
+  const handleSwipeLeft = (cardIndex: number) => {
+    const meal = filteredRecipes[cardIndex];
     console.log('Disliked:', meal.name);
   };
 
-  const renderCard = (meal) => {
+  const renderCard = (meal: Meal | null) => {
     if (!meal) {
-      console.log('No meal data received');
       return (
         <View style={[styles.card, { backgroundColor: '#ffebee', justifyContent: 'center', alignItems: 'center' }]}>
           <Text>No meal data available</Text>
         </View>
       );
     }
-    
-    console.log('Rendering meal:', {
-      name: meal.name,
-      image: meal.image,
-      type: meal.type,
-      calories: meal.calories,
-      hasImage: !!meal.image
-    });
     
     return (
       <View style={styles.card}>
@@ -131,77 +163,121 @@ export default function MealSwipeScreen() {
       
       <View style={{ flex: 1, width: '100%' }}>
         <View style={styles.swiperContainer}>
-          <Swiper
-            cards={allRecipes.length > 0 ? allRecipes : [{
-              id: -1,
-              name: 'No recipes found',
-              image: 'https://via.placeholder.com/300x200?text=No+Recipes',
-              type: 'error',
-              calories: 0,
-              protein: 0,
-              carbs: 0,
-              fat: 0,
-              ingredients: []
-            }]}
-            renderCard={renderCard}
-            onSwipedRight={handleSwipeRight}
-            onSwipedLeft={handleSwipeLeft}
-            onSwipedAll={() => console.log('All 500 cards swiped!')}
-            cardIndex={currentIndex}
-            backgroundColor="transparent"
-            stackSize={3}
-            stackSeparation={15}
-            animateOverlayLabelsOpacity
-            animateCardOpacity
-            swipeBackCard
-          />
+          {filteredRecipes.length > 0 ? (
+            <Swiper
+              cards={filteredRecipes}
+              renderCard={renderCard}
+              onSwipedRight={handleSwipeRight}
+              onSwipedLeft={handleSwipeLeft}
+              onSwiped={(cardIndex) => setCurrentIndex(cardIndex + 1)}
+              cardIndex={currentIndex}
+              backgroundColor="transparent"
+              stackSize={3}
+              stackScale={10}
+              stackSeparation={14}
+              disableBottomSwipe
+              disableTopSwipe
+              verticalSwipe={false}
+              infinite
+              containerStyle={styles.swiperContainer}
+              cardStyle={styles.card}
+              cardVerticalMargin={0}
+              cardHorizontalMargin={0}
+              overlayLabels={{
+                left: {
+                  title: 'NOPE',
+                  style: {
+                    label: {
+                      backgroundColor: '#ff5252',
+                      borderColor: '#ff5252',
+                      color: 'white',
+                      borderWidth: 1,
+                      fontSize: 24,
+                      fontWeight: 'bold',
+                      borderRadius: 10,
+                      padding: 10,
+                      overflow: 'hidden',
+                    },
+                    wrapper: {
+                      flexDirection: 'column',
+                      alignItems: 'flex-end',
+                      justifyContent: 'flex-start',
+                      marginTop: 30,
+                      marginLeft: -30,
+                    },
+                  },
+                },
+                right: {
+                  title: 'LIKE',
+                  style: {
+                    label: {
+                      backgroundColor: '#4CAF50',
+                      borderColor: '#4CAF50',
+                      color: 'white',
+                      borderWidth: 1,
+                      fontSize: 24,
+                      fontWeight: 'bold',
+                      borderRadius: 10,
+                      padding: 10,
+                      overflow: 'hidden',
+                    },
+                    wrapper: {
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      justifyContent: 'flex-start',
+                      marginTop: 30,
+                      marginLeft: 30,
+                    },
+                  },
+                },
+              }}
+            />
+          ) : (
+            <View style={styles.noResultsContainer}>
+              <Text style={styles.noResultsText}>No recipes match your current filters.</Text>
+              <Button 
+                mode="contained" 
+                onPress={() => {
+                  // Reset filters or navigate to filters screen
+                }}
+                style={styles.resetButton}
+              >
+                Reset Filters
+              </Button>
+            </View>
+          )}
         </View>
-      </View>
-
-      <View style={{ width: '100%', marginTop: 'auto' }}>
-        <Text style={styles.likedCount}>
-          Liked Meals: {likedMeals.length}
-        </Text>
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
-    padding: 0,
-    paddingTop: 20,
+    padding: 16,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 5,
-    color: '#333',
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 20,
     color: '#666',
   },
   swiperContainer: {
+    flex: 1,
     width: '100%',
-    height: '100%',
-    paddingHorizontal: 16,
-    paddingTop: -40, // Move cards up by 40 units
-    marginTop: -40,  // Compensate for the negative padding
   },
   card: {
     width: '100%',
-    aspectRatio: 0.75, // Better for swiping
+    aspectRatio: 0.75,
     backgroundColor: 'white',
     borderRadius: 16,
     elevation: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     overflow: 'hidden',
@@ -312,5 +388,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     elevation: 3,
     width: '100%',
+  },
+  noResultsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  noResultsText: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#666',
+  },
+  resetButton: {
+    marginTop: 10,
+    backgroundColor: '#4CAF50',
   },
 });

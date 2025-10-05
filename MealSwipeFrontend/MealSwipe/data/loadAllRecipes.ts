@@ -1,11 +1,11 @@
 import { Meal } from './mealsData';
 import { recipes } from './recipeData';
+import { getMealType, getFoodImage } from './recipeService';
 
 // Embedded recipes as a fallback
 // const embeddedRecipes = [
 //   {
 //     id: 1,
-//     name: 'Burst Cherry Tomato Pasta',
 //     minutes: 20,
 //     calories: 450,
 //     ingredients: ['pasta', 'cherry tomatoes', 'garlic', 'olive oil', 'basil', 'parmesan'],
@@ -74,51 +74,6 @@ export interface RecipeData {
   dietaryRestrictions: string[]; // e.g., ["vegetarian", "gluten-free"]
 }
 
-// // Food images for different meal types
-// const foodImages = [
-//   // Breakfast
-//   'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80&fit=crop&crop=food',
-//   // Lunch
-//   'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&q=80&fit=crop&crop=food',
-//   // Dinner
-//   'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&q=80&fit=crop&crop=food'
-// ];
-
-// // Function to get a food image based on meal type
-// const getFoodImage = (mealType: string): string => {
-//   const typeIndex = ['breakfast', 'lunch', 'dinner'].indexOf(mealType);
-//   return foodImages[typeIndex >= 0 ? typeIndex : 0];
-// };
-
-// Function to determine meal type based on name and ingredients
-// const getMealType = (recipe: RecipeData): string => {
-//   const lowerName = recipe.name.toLowerCase();
-//   const ingredients = recipe.ingredients.join(' ').toLowerCase();
-  
-//   // Check for breakfast items
-//   if (lowerName.includes('pancake') || lowerName.includes('waffle') || 
-//       lowerName.includes('toast') || lowerName.includes('yogurt') || 
-//       lowerName.includes('oatmeal') || lowerName.includes('smoothie') ||
-//       lowerName.includes('breakfast') || ingredients.includes('egg') ||
-//       ingredients.includes('bacon') || ingredients.includes('pancake')) {
-//     return 'breakfast';
-//   } 
-//   // Check for lunch items
-//   else if (lowerName.includes('salad') || lowerName.includes('sandwich') || 
-//            lowerName.includes('soup') || lowerName.includes('wrap') ||
-//            lowerName.includes('lunch') || ingredients.includes('salad') ||
-//            ingredients.includes('sandwich') || ingredients.includes('soup')) {
-//     return 'lunch';
-//   } 
-//   // Default to dinner
-//   else {
-//     return 'dinner';
-//   }
-// };
-
-// A simple food placeholder image
-// const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/300x200.png?text=No+Image+Available';
-
 // Convert recipe data to our meal format
 const convertRecipeToMeal = (recipe: RecipeData): Meal => {
   const mealType = getMealType(recipe);
@@ -126,14 +81,13 @@ const convertRecipeToMeal = (recipe: RecipeData): Meal => {
   return {
     id: recipe.id,
     name: recipe.name,
-    // Use the provided image URL or fall back to placeholder
-    image: recipe.imageUrl || PLACEHOLDER_IMAGE,
+    image: recipe.imageUrl || getFoodImage(mealType),
     type: mealType,
-    calories: Math.round(recipe.macros.calories) || 0,
-    protein: Math.round(recipe.macros.protein_g) || 0,
-    carbs: Math.round(recipe.macros.carbs_g) || 0,
-    fat: Math.round(recipe.macros.fat_g) || 0,
-    ingredients: recipe.ingredients
+    calories: Math.round(recipe.macros?.calories || 0),
+    protein: Math.round(recipe.macros?.protein_g || 0),
+    carbs: Math.round(recipe.macros?.carbs_g || 0),
+    fat: Math.round(recipe.macros?.fat_g || 0),
+    ingredients: recipe.ingredients || []
   };
 };
 
@@ -164,11 +118,11 @@ export const loadAllRecipes = async (): Promise<Meal[]> => {
     console.log('Loading recipes...');
     
     // Try to load recipes
-    const recipes = await loadRecipes();
-    console.log(`Successfully loaded ${recipes.length} recipes`);
+    const loadedRecipes = await loadRecipes();
+    console.log(`Successfully loaded ${loadedRecipes.length} recipes`);
     
     // Convert to Meal format and return a random selection of recipes
-    return recipes
+    return loadedRecipes
       .map(recipe => convertRecipeToMeal(recipe))
       .sort(() => 0.5 - Math.random())
       .slice(0, 50);

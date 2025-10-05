@@ -1,5 +1,5 @@
 import { Meal } from './mealsData';
-import { newRecipes } from './newRecipes';
+import { recipes } from './recipeData';
 
 interface RecipeData {
   id: number;
@@ -28,13 +28,13 @@ const foodImages = [
 ];
 
 // Function to get a food image based on meal type
-const getFoodImage = (mealType: string): string => {
+export const getFoodImage = (mealType: string): string => {
   const typeIndex = ['breakfast', 'lunch', 'dinner'].indexOf(mealType);
   return foodImages[typeIndex >= 0 ? typeIndex : 0];
 };
 
 // Function to determine meal type based on name and ingredients
-const getMealType = (recipe: RecipeData): string => {
+export const getMealType = (recipe: RecipeData): string => {
   const lowerName = recipe.name.toLowerCase();
   const ingredients = recipe.ingredients.join(' ').toLowerCase();
   
@@ -79,8 +79,8 @@ const convertRecipeToMeal = (recipe: RecipeData): Meal => {
 // Load all recipes from newRecipes.ts
 export const loadAllRecipes = async (): Promise<Meal[]> => {
   try {
-    // Convert newRecipes to Meal format
-    return newRecipes.map(recipe => ({
+    // Convert recipes to Meal format
+    return recipes.map(recipe => ({
       id: recipe.id,
       name: recipe.name,
       image: recipe.imageUrl || getFoodImage(getMealType(recipe)),

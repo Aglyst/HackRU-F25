@@ -8,6 +8,7 @@ export interface Meal {
   carbs: number;
   fat: number;
   ingredients: string[];
+  dietaryRestrictions?: string[];
 }
 
 import { loadAllRecipes, allRecipes } from './recipeService';
