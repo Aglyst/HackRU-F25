@@ -54,12 +54,11 @@ export default function MealSwipeScreen() {
       if (nutritionFilters.lowFat && meal.fat > 15) return false;
       if (nutritionFilters.highCalories && meal.calories < 500) return false;
 
-      // Filter by dietary restrictions
-      const restrictions = meal.dietaryRestrictions || [];
-      if (dietaryFilters.vegetarian && !restrictions.includes('vegetarian')) return false;
-      if (dietaryFilters.vegan && !restrictions.includes('vegan')) return false;
-      if (dietaryFilters.glutenFree && !restrictions.includes('gluten-free')) return false;
-      if (dietaryFilters.dairyFree && !restrictions.includes('dairy-free')) return false;
+      // Filter by dietary restrictions - using same approach as meal type filtering
+      if (dietaryFilters.vegetarian && !meal.dietaryRestrictions?.includes('vegetarian')) return false;
+      if (dietaryFilters.vegan && !meal.dietaryRestrictions?.includes('vegan')) return false;
+      if (dietaryFilters.glutenFree && !meal.dietaryRestrictions?.includes('gluten-free')) return false;
+      if (dietaryFilters.dairyFree && !meal.dietaryRestrictions?.includes('dairy-free')) return false;
 
       return true;
     });
