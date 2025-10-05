@@ -1569,5 +1569,5 @@ export const newRecipes: RecipeData[] = [
       carbs_g: 42,
       fat_g: 19
     }
-  }
+  },
 ];

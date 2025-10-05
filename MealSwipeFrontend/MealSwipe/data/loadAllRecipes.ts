@@ -63,13 +63,15 @@ export interface RecipeData {
   ingredients: string[];
   steps: string[];
   text_blob: string;
-  imageUrl?: string;  // Optional field for recipe image URL
+  imageUrl?: string;
   macros: {
     calories: number;
     protein_g: number;
     carbs_g: number;
     fat_g: number;
   };
+  mealType: "breakfast" | "lunch" | "dinner";
+  dietaryRestrictions: string[]; // e.g., ["vegetarian", "gluten-free"]
 }
 
 // Food images for different meal types

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, Image, Dimensions, SafeAreaView } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { Card, Button } from 'react-native-paper';
@@ -8,8 +8,26 @@ import { allRecipes } from '@/data/loadAllRecipes';
 const { width, height } = Dimensions.get('window');
 
 export default function MealSwipeScreen() {
-  const { likedMeals, addLikedMeal } = useAppContext();
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const {
+    likedMeals,
+    addLikedMeal,
+    mealTypeFilters,
+    nutritionFilters,
+    dietaryFilters,
+    setMealTypeFilters,
+    setNutritionFilters,
+    setDietaryFilters
+  } = useAppContext();
+
+  // useEffect(() => {
+  //   console.log('Meal Type Filters Set:', mealTypeFilters);
+  //   console.log('Nutrition Filters Set:', nutritionFilters);
+  //   console.log('Dietary Filters Set:', dietaryFilters);
+  
+  // }, [mealTypeFilters, nutritionFilters, dietaryFilters]);
+  
 
   const handleSwipeRight = (cardIndex) => {
     const meal = allRecipes[cardIndex];

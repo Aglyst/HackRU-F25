@@ -109,14 +109,14 @@ export default function CartScreen() {
           </View>
         </ScrollView>
       </View>
-      <Button 
+      {/* <Button 
         mode="contained" 
         onPress={() => {}} 
         style={styles.generateButton}
         disabled={shoppingList.length === 0}
       >
         Generate Shopping List
-      </Button>
+      </Button> */}
     </View>
   );
 
