@@ -83,23 +83,6 @@ export default function MealSwipeScreen() {
         />
       </View>
 
-      <View style={styles.actionButtons}>
-        <Button 
-          mode="outlined" 
-          onPress={() => console.log('Skip')}
-          style={styles.skipButton}
-        >
-          ❌ Skip
-        </Button>
-        <Button 
-          mode="contained" 
-          onPress={() => console.log('Like')}
-          style={styles.likeButton}
-        >
-          ❤️ Like
-        </Button>
-      </View>
-
       <Text style={styles.likedCount}>
         Liked Meals: {likedMeals.length}
       </Text>
@@ -112,6 +95,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
     paddingTop: 50,
+    alignItems: 'center',
   },
   title: {
     fontSize: 28,
@@ -127,15 +111,18 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   swiperContainer: {
-    height: height * 0.5,
-    marginHorizontal: 20,
+    height: height * 0.6,
+    width: '90%',
+    alignSelf: 'center',
     marginBottom: 20,
   },
   card: {
-    height: height * 0.5,
+    height: height * 0.6,
+    width: '100%',
     borderRadius: 20,
     elevation: 5,
     backgroundColor: 'white',
+    alignSelf: 'center',
   },
   mealImage: {
     width: '100%',
