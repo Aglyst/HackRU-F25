@@ -19,6 +19,13 @@ interface AppContextType {
   removedIngredients: { [mealId: number]: string[] };
   removeIngredient: (mealId: number, ingredient: string) => void;
   addIngredient: (mealId: number, ingredient: string) => void;
+  setMealTypeFilters: (filters: { breakfast: boolean; lunch: boolean; dinner: boolean }) => void;
+  setNutritionFilters: (filters: { highProtein: boolean; lowCarb: boolean; lowFat: boolean; highCalories: boolean }) => void;
+  setDietaryFilters: (filters: { vegetarian: boolean; vegan: boolean; glutenFree: boolean; dairyFree: boolean }) => void;
+  mealTypeFilters: { breakfast: boolean; lunch: boolean; dinner: boolean };
+  nutritionFilters: { highProtein: boolean; lowCarb: boolean; lowFat: boolean; highCalories: boolean };
+  dietaryFilters: { vegetarian: boolean; vegan: boolean; glutenFree: boolean; dairyFree: boolean };
+
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -38,6 +45,26 @@ interface AppProviderProps {
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [likedMeals, setLikedMeals] = useState<Meal[]>([]);
   const [removedIngredients, setRemovedIngredients] = useState<{ [mealId: number]: string[] }>({});
+
+  const [mealTypeFilters, setMealTypeFilters] = useState({
+    breakfast: false,
+    lunch: false,
+    dinner: false,
+  });
+  
+  const [nutritionFilters, setNutritionFilters] = useState({
+    highProtein: false,
+    lowCarb: false,
+    lowFat: false,
+    highCalories: false,
+  });
+  
+  const [dietaryFilters, setDietaryFilters] = useState({
+    vegetarian: false,
+    vegan: false,
+    glutenFree: false,
+    dairyFree: false,
+  });
 
   const addLikedMeal = (meal: Meal) => {
     setLikedMeals(prev => {
@@ -80,6 +107,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     removedIngredients,
     removeIngredient,
     addIngredient,
+    setMealTypeFilters,
+    setNutritionFilters,
+    setDietaryFilters,
+    mealTypeFilters,
+    nutritionFilters,
+    dietaryFilters
   };
 
   return (

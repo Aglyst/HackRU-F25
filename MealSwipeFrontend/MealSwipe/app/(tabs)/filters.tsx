@@ -1,27 +1,40 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import { Card, Button, Chip, Switch, List } from 'react-native-paper';
+import { useRouter } from 'expo-router';
+import { useAppContext } from '@/context/AppContext';
 
 export default function FiltersScreen() {
-  const [mealTypeFilters, setMealTypeFilters] = useState({
-    breakfast: false,
-    lunch: false,
-    dinner: false,
-  });
+  const router = useRouter();
 
-  const [nutritionFilters, setNutritionFilters] = useState({
-    highProtein: false,
-    lowCarb: false,
-    lowFat: false,
-    highCalories: false,
-  });
+  const {
+    mealTypeFilters,
+    nutritionFilters,
+    dietaryFilters,
+    setMealTypeFilters,
+    setNutritionFilters,
+    setDietaryFilters
+  } = useAppContext();
 
-  const [dietaryFilters, setDietaryFilters] = useState({
-    vegetarian: false,
-    vegan: false,
-    glutenFree: false,
-    dairyFree: false,
-  });
+  // const [mealTypeFilters, setMealTypeFilters] = useState({
+  //   breakfast: false,
+  //   lunch: false,
+  //   dinner: false,
+  // });
+
+  // const [nutritionFilters, setNutritionFilters] = useState({
+  //   highProtein: false,
+  //   lowCarb: false,
+  //   lowFat: false,
+  //   highCalories: false,
+  // });
+
+  // const [dietaryFilters, setDietaryFilters] = useState({
+  //   vegetarian: false,
+  //   vegan: false,
+  //   glutenFree: false,
+  //   dairyFree: false,
+  // });
 
   const toggleMealType = (type: string) => {
     setMealTypeFilters(prev => ({
@@ -56,6 +69,8 @@ export default function FiltersScreen() {
       nutrition: nutritionFilters,
       dietary: dietaryFilters
     });
+
+    router.navigate('/');
   };
 
   return (

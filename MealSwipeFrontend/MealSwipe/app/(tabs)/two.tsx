@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, Image, TouchableOpacity, FlatList } from 'react-native';
-import { Card, Button, Chip, ToggleButton } from 'react-native-paper';
+import { Card, Button, Chip, ToggleButton, TouchableRipple } from 'react-native-paper';
 import { useAppContext } from '@/context/AppContext';
 
 export default function CartScreen() {
@@ -126,20 +126,39 @@ export default function CartScreen() {
         <ToggleButton.Row 
           onValueChange={value => setActiveTab(value)} 
           value={activeTab}
-          style={styles.tabBar}
+          style={styles.tabRow}
         >
-          <ToggleButton 
-            icon="food" 
-            value="meals" 
-            status={activeTab === 'meals' ? 'checked' : 'unchecked'}
+          <TouchableRipple
+            onPress={() => setActiveTab('meals')}
             style={styles.tabButton}
-          />
-          <ToggleButton 
-            icon="shopping" 
-            value="ingredients" 
-            status={activeTab === 'ingredients' ? 'checked' : 'unchecked'}
+            rippleColor="rgba(0,0,0,0.08)"
+            borderless
+            accessibilityRole="button"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <ToggleButton 
+              icon="food" 
+              value="meals" 
+              status={activeTab === 'meals' ? 'checked' : 'unchecked'}
+              style={styles.toggleInner}
+            />
+          </TouchableRipple>
+
+          <TouchableRipple
+            onPress={() => setActiveTab('ingredients')}
             style={styles.tabButton}
-          />
+            rippleColor="rgba(0,0,0,0.08)"
+            borderless
+            accessibilityRole="button"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <ToggleButton 
+              icon="format-list-bulleted" 
+              value="ingredients" 
+              status={activeTab === 'ingredients' ? 'checked' : 'unchecked'}
+              style={styles.toggleInner}
+            />
+          </TouchableRipple>
         </ToggleButton.Row>
       </View>
 
@@ -166,6 +185,18 @@ const styles = StyleSheet.create({
   tabButton: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 6,
+  },
+  toggleInner: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+  },
+  tabContent: {
+    flex: 1,
+    width: '100%',
   },
   scrollViewContent: {
     padding: 10,
