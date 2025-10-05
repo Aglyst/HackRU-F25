@@ -1,6 +1,59 @@
-import * as FileSystem from 'expo-file-system';
-import { Asset } from 'expo-asset';
 import { Meal } from './mealsData';
+import { newRecipes } from './newRecipes';
+
+// Embedded recipes as a fallback
+const embeddedRecipes = [
+  {
+    id: 1,
+    name: 'Burst Cherry Tomato Pasta',
+    minutes: 20,
+    calories: 450,
+    ingredients: ['pasta', 'cherry tomatoes', 'garlic', 'olive oil', 'basil', 'parmesan'],
+    steps: ['Cook pasta', 'Sauté garlic and tomatoes', 'Combine and serve'],
+    text_blob: 'Burst Cherry Tomato Pasta is a quick and delicious meal...',
+    macros: { calories: 450, protein_g: 15, carbs_g: 60, fat_g: 18 }
+  },
+  {
+    id: 2,
+    name: 'Avocado Toast with Egg',
+    minutes: 10,
+    calories: 350,
+    ingredients: ['bread', 'avocado', 'eggs', 'salt', 'pepper', 'red pepper flakes'],
+    steps: ['Toast bread', 'Mash avocado', 'Fry egg', 'Assemble and season'],
+    text_blob: 'A simple and nutritious breakfast option...',
+    macros: { calories: 350, protein_g: 12, carbs_g: 30, fat_g: 22 }
+  },
+  {
+    id: 3,
+    name: 'Chicken Caesar Salad',
+    minutes: 25,
+    calories: 380,
+    ingredients: ['chicken breast', 'romaine lettuce', 'parmesan', 'croutons', 'caesar dressing'],
+    steps: ['Grill chicken', 'Chop lettuce', 'Toss with dressing and toppings'],
+    text_blob: 'Classic Caesar salad with grilled chicken...',
+    macros: { calories: 380, protein_g: 35, carbs_g: 20, fat_g: 18 }
+  },
+  {
+    id: 4,
+    name: 'Vegetable Stir Fry',
+    minutes: 15,
+    calories: 320,
+    ingredients: ['mixed vegetables', 'tofu', 'soy sauce', 'garlic', 'ginger', 'sesame oil'],
+    steps: ['Stir-fry vegetables', 'Add tofu and sauce', 'Cook until heated through'],
+    text_blob: 'Quick and healthy vegetable stir fry...',
+    macros: { calories: 320, protein_g: 18, carbs_g: 35, fat_g: 14 }
+  },
+  {
+    id: 5,
+    name: 'Berry Smoothie Bowl',
+    minutes: 5,
+    calories: 280,
+    ingredients: ['mixed berries', 'banana', 'yogurt', 'granola', 'honey'],
+    steps: ['Blend fruits and yogurt', 'Pour into bowl', 'Top with granola and honey'],
+    text_blob: 'Refreshing and nutritious smoothie bowl...',
+    macros: { calories: 280, protein_g: 8, carbs_g: 55, fat_g: 5 }
+  }
+];
 
 export interface RecipeData {
   id: number;
@@ -82,60 +135,52 @@ const convertRecipeToMeal = (recipe: RecipeData): Meal => {
   };
 };
 
-// Sample data to use when file loading fails
-const sampleRecipes: RecipeData[] = [
-  {
-    id: 1,
-    name: "Delicious Pasta",
-    minutes: 30,
-    calories: 450,
-    ingredients: ["pasta", "tomato sauce", "garlic", "basil"],
-    steps: ["Boil pasta", "Heat sauce", "Mix together"],
-    text_blob: "A delicious pasta dish",
-    macros: {
-      calories: 450,
-      protein_g: 15,
-      carbs_g: 75,
-      fat_g: 8
+// Helper function to load recipes
+const loadRecipes = async (): Promise<RecipeData[]> => {
+  try {
+    // First, try to use newRecipes
+    if (newRecipes && newRecipes.length > 0) {
+      console.log(`Using ${newRecipes.length} recipes from newRecipes`);
+      return newRecipes;
     }
-  },
-  {
-    id: 2,
-    name: "Fresh Salad",
-    minutes: 15,
-    calories: 250,
-    ingredients: ["lettuce", "tomato", "cucumber", "olive oil"],
-    steps: ["Chop vegetables", "Mix in bowl", "Add dressing"],
-    text_blob: "A fresh and healthy salad",
-    macros: {
-      calories: 250,
-      protein_g: 5,
-      carbs_g: 15,
-      fat_g: 20
+    
+    // Fall back to embedded recipes if available
+    if (embeddedRecipes && embeddedRecipes.length > 0) {
+      console.log('Falling back to embedded recipes');
+      return embeddedRecipes;
     }
+    
+    throw new Error('No recipes available');
+  } catch (error) {
+    console.error('Error loading recipes:', error);
+    throw error;
   }
-];
-
-// Import recipes from TypeScript file
-import { recipesData } from './recipes';
-
+};
 // Load and convert all recipes
 export const loadAllRecipes = async (): Promise<Meal[]> => {
   try {
-    // Convert the imported recipes to Meal format
-    return recipesData.map(recipe => convertRecipeToMeal(recipe));
+    console.log('Loading recipes...');
+    
+    // Try to load recipes
+    const recipes = await loadRecipes();
+    console.log(`Successfully loaded ${recipes.length} recipes`);
+    
+    // Convert to Meal format and return a random selection of recipes
+    return recipes
+      .map(recipe => convertRecipeToMeal(recipe))
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 50);
   } catch (error) {
-    console.error('Error loading recipes:', error);
-    // Fall back to sample data if there's an error
-    return sampleRecipes.map(recipe => convertRecipeToMeal(recipe));
+    console.error('Error loading recipes, falling back to sample recipes:', error);
+    
+    // Fall back to the sample recipes if there's an error
+    return newRecipes.map(recipe => convertRecipeToMeal(recipe));
   }
 };
-
 // This will be populated when the app loads
 export let allRecipes: Meal[] = [];
 
-// Initialize the recipes when the module loads
-(async () => {
-  allRecipes = await loadAllRecipes();
-  console.log(`Loaded ${allRecipes.length} recipes`);
-})();
+// Initialize with our new recipes
+loadAllRecipes().then(recipes => {
+  allRecipes = recipes;
+});
