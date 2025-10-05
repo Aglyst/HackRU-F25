@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, Image, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, Image, Dimensions, SafeAreaView } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { Card, Button } from 'react-native-paper';
 import { useAppContext } from '@/context/AppContext';
@@ -27,8 +27,9 @@ export default function MealSwipeScreen() {
     
     return (
       <Card style={styles.card}>
-        <Image source={{ uri: meal.image }} style={styles.mealImage} />
-        <Card.Content style={styles.cardContent}>
+        <View style={styles.cardInner}>
+          <Image source={{ uri: meal.image }} style={styles.mealImage} />
+          <Card.Content style={styles.cardContent}>
           <Text style={styles.mealName}>{meal.name}</Text>
           <Text style={styles.mealType}>{meal.type.toUpperCase()}</Text>
           
@@ -56,36 +57,43 @@ export default function MealSwipeScreen() {
           {meal.ingredients.length > 4 && (
             <Text style={styles.moreIngredients}>+{meal.ingredients.length - 4} more</Text>
           )}
-        </Card.Content>
+          </Card.Content>
+        </View>
       </Card>
     );
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>🍽️ MealSwipe</Text>
-      <Text style={styles.subtitle}>Swipe right to like, left to skip</Text>
+      <View style={{ width: '100%', alignItems: 'center', marginBottom: 20 }}>
+        <Text style={styles.title}>🍽️ MealSwipe</Text>
+        <Text style={styles.subtitle}>Swipe right to like, left to skip</Text>
+      </View>
       
-      <View style={styles.swiperContainer}>
-        <Swiper
-          cards={allRecipes}
-          renderCard={renderCard}
-          onSwipedRight={handleSwipeRight}
-          onSwipedLeft={handleSwipeLeft}
-          onSwipedAll={() => console.log('All 500 cards swiped!')}
-          cardIndex={currentIndex}
-          backgroundColor="transparent"
-          stackSize={3}
-          stackSeparation={15}
-          animateOverlayLabelsOpacity
-          animateCardOpacity
-          swipeBackCard
-        />
+      <View style={{ flex: 1, width: '100%' }}>
+        <View style={styles.swiperContainer}>
+          <Swiper
+            cards={allRecipes}
+            renderCard={renderCard}
+            onSwipedRight={handleSwipeRight}
+            onSwipedLeft={handleSwipeLeft}
+            onSwipedAll={() => console.log('All 500 cards swiped!')}
+            cardIndex={currentIndex}
+            backgroundColor="transparent"
+            stackSize={3}
+            stackSeparation={15}
+            animateOverlayLabelsOpacity
+            animateCardOpacity
+            swipeBackCard
+          />
+        </View>
       </View>
 
-      <Text style={styles.likedCount}>
-        Liked Meals: {likedMeals.length}
-      </Text>
+      <View style={{ width: '100%', marginTop: 'auto' }}>
+        <Text style={styles.likedCount}>
+          Liked Meals: {likedMeals.length}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -94,8 +102,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    paddingTop: 50,
-    alignItems: 'center',
+    padding: 20,
   },
   title: {
     fontSize: 28,
@@ -111,77 +118,82 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   swiperContainer: {
-    height: height * 0.6,
-    width: '90%',
-    alignSelf: 'center',
+    height: height * 0.5,
+    width: '100%',
+    marginTop: 20,
     marginBottom: 20,
   },
   card: {
-    height: height * 0.6,
+    height: '100%',
     width: '100%',
     borderRadius: 20,
-    elevation: 5,
     backgroundColor: 'white',
-    alignSelf: 'center',
+  },
+  cardInner: {
+    flex: 1,
+    overflow: 'hidden',
+    borderRadius: 20,
   },
   mealImage: {
     width: '100%',
-    height: 150,
+    height: 50, // Further reduced height
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
   cardContent: {
-    padding: 15,
+    padding: 10, // Reduced from 15 to make the card more compact
     flex: 1,
   },
   mealName: {
-    fontSize: 24,
+    fontSize: 16, // Reduced from 20
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 1, // Reduced from 3
     color: '#333',
   },
   mealType: {
-    fontSize: 14,
+    fontSize: 10, // Reduced from 12
     color: '#666',
-    marginBottom: 15,
+    marginBottom: 4, // Reduced from 8
+    textTransform: 'capitalize',
   },
   nutritionContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 10,
-    paddingVertical: 10,
+    marginBottom: 3, // Reduced from 5
+    paddingVertical: 3, // Reduced from 5
     backgroundColor: '#f8f8f8',
     borderRadius: 8,
   },
   nutritionItem: {
     alignItems: 'center',
+    marginBottom: 1, // Reduced from 2
   },
   nutritionLabel: {
-    fontSize: 12,
+    fontSize: 10,
     color: '#666',
     marginBottom: 2,
   },
   nutritionValue: {
-    fontSize: 16,
+    fontSize: 12, // Reduced from 14
     fontWeight: 'bold',
     color: '#333',
   },
   ingredientsTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
+    fontSize: 12, // Reduced from 16
+    fontWeight: '600',
+    marginBottom: 3,
     color: '#333',
   },
   ingredients: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#666',
-    lineHeight: 20,
+    lineHeight: 16,
   },
   moreIngredients: {
-    fontSize: 12,
+    fontSize: 10,
     color: '#999',
     fontStyle: 'italic',
-    marginTop: 5,
+    marginTop: 3,
   },
   actionButtons: {
     flexDirection: 'row',
@@ -201,6 +213,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 20,
+    padding: 12,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    elevation: 3,
+    width: '100%',
   },
 });

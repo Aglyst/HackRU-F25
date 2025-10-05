@@ -8,6 +8,10 @@
     "scheme": "mealswipe",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "assetBundlePatterns": [
+      "**/*",
+      "assets/recipes_top500_with_macros.jsonl"
+    ],
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",

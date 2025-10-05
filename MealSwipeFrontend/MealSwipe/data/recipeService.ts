@@ -2,7 +2,7 @@ import * as FileSystem from 'expo-file-system';
 import { Asset } from 'expo-asset';
 import { Meal } from './mealsData';
 
-export interface RecipeData {
+interface RecipeData {
   id: number;
   name: string;
   minutes: number | null;
@@ -10,7 +10,6 @@ export interface RecipeData {
   ingredients: string[];
   steps: string[];
   text_blob: string;
-  imageUrl?: string;  // Optional field for recipe image URL
   macros: {
     calories: number;
     protein_g: number;
@@ -61,9 +60,6 @@ const getMealType = (recipe: RecipeData): string => {
   }
 };
 
-// A simple food placeholder image
-const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/300x200.png?text=No+Image+Available';
-
 // Convert recipe data to our meal format
 const convertRecipeToMeal = (recipe: RecipeData): Meal => {
   const mealType = getMealType(recipe);
@@ -71,8 +67,7 @@ const convertRecipeToMeal = (recipe: RecipeData): Meal => {
   return {
     id: recipe.id,
     name: recipe.name,
-    // Use the provided image URL or fall back to placeholder
-    image: recipe.imageUrl || PLACEHOLDER_IMAGE,
+    image: getFoodImage(mealType),
     type: mealType,
     calories: Math.round(recipe.macros.calories) || 0,
     protein: Math.round(recipe.macros.protein_g) || 0,
@@ -82,52 +77,24 @@ const convertRecipeToMeal = (recipe: RecipeData): Meal => {
   };
 };
 
-// Sample data to use when file loading fails
-const sampleRecipes: RecipeData[] = [
-  {
-    id: 1,
-    name: "Delicious Pasta",
-    minutes: 30,
-    calories: 450,
-    ingredients: ["pasta", "tomato sauce", "garlic", "basil"],
-    steps: ["Boil pasta", "Heat sauce", "Mix together"],
-    text_blob: "A delicious pasta dish",
-    macros: {
-      calories: 450,
-      protein_g: 15,
-      carbs_g: 75,
-      fat_g: 8
-    }
-  },
-  {
-    id: 2,
-    name: "Fresh Salad",
-    minutes: 15,
-    calories: 250,
-    ingredients: ["lettuce", "tomato", "cucumber", "olive oil"],
-    steps: ["Chop vegetables", "Mix in bowl", "Add dressing"],
-    text_blob: "A fresh and healthy salad",
-    macros: {
-      calories: 250,
-      protein_g: 5,
-      carbs_g: 15,
-      fat_g: 20
-    }
-  }
-];
-
-// Import recipes from TypeScript file
-import { recipesData } from './recipes';
-
-// Load and convert all recipes
+// Load and convert all recipes from the JSONL file
 export const loadAllRecipes = async (): Promise<Meal[]> => {
   try {
-    // Convert the imported recipes to Meal format
-    return recipesData.map(recipe => convertRecipeToMeal(recipe));
+    // Load the JSONL file
+    const fileUri = Asset.fromModule(require('./recipes_top500_with_macros.jsonl')).uri;
+    const fileContent = await FileSystem.readAsStringAsync(fileUri);
+    
+    // Parse JSONL file (each line is a separate JSON object)
+    const recipes = fileContent
+      .split('\n')
+      .filter(line => line.trim() !== '')
+      .map(line => JSON.parse(line) as RecipeData);
+    
+    // Convert to Meal format
+    return recipes.map(recipe => convertRecipeToMeal(recipe));
   } catch (error) {
     console.error('Error loading recipes:', error);
-    // Fall back to sample data if there's an error
-    return sampleRecipes.map(recipe => convertRecipeToMeal(recipe));
+    return [];
   }
 };
 
